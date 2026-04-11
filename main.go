@@ -15,8 +15,10 @@ import (
 )
 
 type appConfig struct {
-	WEBHOOK_URLS string `envconfig:"WEBHOOK_URLS"`
-	GITHUB_TOKEN string `envconfig:"GITHUB_TOKEN"`
+	WEBHOOK_URLS    string `envconfig:"WEBHOOK_URLS"`
+	GITHUB_TOKEN    string `envconfig:"GITHUB_TOKEN"`
+	REPO_TARGET     string `envconfig:"REPO_TARGET"`
+	NUMBER_OF_ISSUE string `envconfig:"NUMBER_OF_ISSUE"`
 }
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 	}
 
 	webhooks := strings.Split(appConfig.WEBHOOK_URLS, ",")
-	issueUrl := "https://api.github.com/repos/MARCROCK22/discord-api-docs-tracker/issues/1"
+	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s", appConfig.REPO_TARGET, appConfig.NUMBER_OF_ISSUE)
 
 	response, err := Fetch(issueUrl)
 	if err != nil {
