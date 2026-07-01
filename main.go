@@ -67,7 +67,7 @@ func main() {
 	})
 
 	for _, item := range pullRequests {
-		if item.User.Login == "dependabot[bot]" {
+		if item.User.Login == "dependabot[bot]" || item.User.Login == "renovate[bot]" {
 			continue
 		}
 
