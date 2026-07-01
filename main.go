@@ -67,6 +67,10 @@ func main() {
 	})
 
 	for _, item := range pullRequests {
+		if item.User.Login == "dependabot[bot]" {
+			continue
+		}
+
 		createdAt := item.CreatedAt
 		mergedAt := item.MergedAt
 		closedAt := item.ClosedAt
