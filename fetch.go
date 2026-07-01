@@ -8,12 +8,16 @@ import (
 	"net/http"
 )
 
-func Fetch(url string) (*http.Response, error) {
+func Fetch(url string, token string) (*http.Response, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
 
 	response, err := client.Do(req)

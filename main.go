@@ -29,7 +29,7 @@ func main() {
 	webhooks := strings.Split(*webhookURLs, ",")
 	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s", *repoTarget, *numberOfIssue)
 
-	response, err := Fetch(issueUrl)
+	response, err := Fetch(issueUrl, *githubToken)
 	if err != nil {
 		fmt.Printf("Error fetching issue: %v\n", err)
 		return
@@ -50,7 +50,7 @@ func main() {
 	}
 	oldCheck := time.UnixMilli(int64(bodyInt))
 
-	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", *repoSource))
+	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", *repoSource), *githubToken)
 	if err != nil {
 		fmt.Printf("Error fetching pull requests: %v\n", err)
 		return
