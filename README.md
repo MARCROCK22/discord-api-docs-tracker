@@ -1,6 +1,6 @@
 # Discord API Docs Tracker
 
-Sends Discord webhook notifications when pull requests are opened, closed, or merged in a target GitHub repository (defaults to [discord/discord-api-docs](https://github.com/discord/discord-api-docs), configurable via `REPO_SOURCE`).
+Sends Discord webhook notifications when pull requests are opened, closed, or merged in a target GitHub repository (defaults to [discord/discord-api-docs](https://github.com/discord/discord-api-docs), configurable via `-repo-source`).
 
 ## Prerequisites
 
@@ -18,41 +18,38 @@ Sends Discord webhook notifications when pull requests are opened, closed, or me
    cd discord-api-docs-tracker
    ```
 
-2. Install dependencies:
+2. Build:
 
    ```sh
-   go mod download
+   go build -o discord-api-docs-tracker .
    ```
-
-3. Create a `.env` file in the project root:
-
-   ```env
-   GITHUB_TOKEN=your_github_personal_access_token
-   WEBHOOK_URLS=https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/...
-   REPO_TARGET=owner/repo
-   REPO_SOURCE=discord/discord-api-docs
-   NUMBER_OF_ISSUE=1
-   ```
-
-   | Variable          | Description                                                        |
-   | ----------------- | ------------------------------------------------------------------ |
-   | `GITHUB_TOKEN`    | GitHub PAT with permission to edit issues on the target repo       |
-   | `WEBHOOK_URLS`    | Discord webhook URLs to post notifications (comma-separated for multiple) |
-   | `REPO_TARGET`     | GitHub repo that holds the tracker issue (e.g. `MARCROCK22/discord-api-docs-tracker`) |
-   | `REPO_SOURCE`     | GitHub repo to watch for pull requests (e.g. `discord/discord-api-docs`) |
-   | `NUMBER_OF_ISSUE` | Issue number used to store the last check timestamp                |
 
 ## Usage
 
-Run the application:
+Configuration is passed as command-line flags:
 
 ```sh
-go run .
+./discord-api-docs-tracker \
+  -token "$GITHUB_TOKEN" \
+  -webhooks "https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/..." \
+  -repo-target owner/repo \
+  -repo-source discord/discord-api-docs \
+  -issue 1
 ```
+
+| Flag           | Description                                                                            |
+| -------------- | ------------------------------------------------------------------------------------- |
+| `-token`       | GitHub PAT with permission to edit issues on the target repo                          |
+| `-webhooks`    | Discord webhook URLs to post notifications (comma-separated for multiple)             |
+| `-repo-target` | GitHub repo that holds the tracker issue (e.g. `MARCROCK22/discord-api-docs-tracker`) |
+| `-repo-source` | GitHub repo to watch for pull requests (e.g. `discord/discord-api-docs`)              |
+| `-issue`       | Issue number used to store the last check timestamp                                   |
+
+Run `./discord-api-docs-tracker -h` to list the flags.
 
 Each execution performs a single check-and-notify cycle. To run it on a schedule, use a cron job or a task scheduler:
 
 ```sh
 # Example: run every 5 minutes via cron
-*/5 * * * * cd /path/to/discord-api-docs-tracker && go run .
+*/5 * * * * /path/to/discord-api-docs-tracker -token ... -webhooks ... -repo-target owner/repo -repo-source discord/discord-api-docs -issue 1
 ```
