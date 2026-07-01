@@ -3,38 +3,31 @@ package main
 import (
 	"cmp"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
-	"github.com/kelseyhightower/envconfig"
 )
 
-type appConfig struct {
-	WEBHOOK_URLS    string `envconfig:"WEBHOOK_URLS"`
-	GITHUB_TOKEN    string `envconfig:"GITHUB_TOKEN"`
-	REPO_TARGET     string `envconfig:"REPO_TARGET"`
-	NUMBER_OF_ISSUE string `envconfig:"NUMBER_OF_ISSUE"`
-	REPO_SOURCE     string `envconfig:"REPO_SOURCE"`
-}
-
 func main() {
-	var appConfig appConfig
-	if err := godotenv.Load(); err != nil {
-		fmt.Printf("Error loading .env file: %v\n", err)
-		return
-	}
-	if err := envconfig.Process("", &appConfig); err != nil {
-		fmt.Printf("Error processing environment variables: %v\n", err)
+	webhookURLs := flag.String("webhooks", "", "comma-separated Discord webhook URLs")
+	githubToken := flag.String("token", "", "GitHub token with permission to edit the state issue")
+	repoTarget := flag.String("repo-target", "", "owner/repo holding the state issue")
+	repoSource := flag.String("repo-source", "", "owner/repo to watch for pull requests")
+	numberOfIssue := flag.String("issue", "", "issue number storing the last-check timestamp")
+	flag.Parse()
+
+	if *webhookURLs == "" || *githubToken == "" || *repoTarget == "" || *repoSource == "" || *numberOfIssue == "" {
+		fmt.Println("missing required flags")
+		flag.Usage()
 		return
 	}
 
-	webhooks := strings.Split(appConfig.WEBHOOK_URLS, ",")
-	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s", appConfig.REPO_TARGET, appConfig.NUMBER_OF_ISSUE)
+	webhooks := strings.Split(*webhookURLs, ",")
+	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s", *repoTarget, *numberOfIssue)
 
 	response, err := Fetch(issueUrl)
 	if err != nil {
@@ -57,7 +50,7 @@ func main() {
 	}
 	oldCheck := time.UnixMilli(int64(bodyInt))
 
-	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", appConfig.REPO_SOURCE))
+	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", *repoSource))
 	if err != nil {
 		fmt.Printf("Error fetching pull requests: %v\n", err)
 		return
@@ -127,7 +120,7 @@ func main() {
 		"body": strconv.FormatInt(time.Now().UnixMilli(), 10),
 	}, map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", appConfig.GITHUB_TOKEN),
+		"Authorization": fmt.Sprintf("Bearer %s", *githubToken),
 	})
 	if err != nil {
 		fmt.Printf("Error updating issue: %v\n", err)
