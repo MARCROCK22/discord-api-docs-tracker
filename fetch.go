@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
@@ -55,13 +56,19 @@ func FetchWithBody(method string, url string, body map[string]any, headers map[s
 
 func SendEmbed(embed map[string]any, pullRequestType string, webhooks []string) error {
 	for _, webhook := range webhooks {
-		_, err := FetchWithBody("POST", webhook, map[string]any{
+		res, err := FetchWithBody("POST", webhook, map[string]any{
 			"embeds":   []map[string]any{embed},
 			"username": "api-docs",
 		}, nil)
 		if err != nil {
 			log.Printf("failed to send embed to webhook %s: %v\n", webhook, err)
+			continue
 		}
+		if res.StatusCode < 200 || res.StatusCode >= 300 {
+			body, _ := io.ReadAll(res.Body)
+			log.Printf("webhook %s returned status %d: %s\n", webhook, res.StatusCode, string(body))
+		}
+		res.Body.Close()
 	}
 
 	return nil

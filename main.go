@@ -84,7 +84,11 @@ func main() {
 			"url": item.HTMLURL,
 		}
 		if item.Body != nil {
-			embed["description"] = *item.Body
+			desc := *item.Body
+			if r := []rune(desc); len(r) > 4096 {
+				desc = string(r[:4093]) + "..."
+			}
+			embed["description"] = desc
 		}
 
 		if createdAt.After(oldCheck) {
