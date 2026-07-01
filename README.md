@@ -1,6 +1,6 @@
 # Discord API Docs Tracker
 
-Sends Discord webhook notifications when pull requests are opened, closed, or merged in the [discord/discord-api-docs](https://github.com/discord/discord-api-docs) repository.
+Sends Discord webhook notifications when pull requests are opened, closed, or merged in a target GitHub repository (defaults to [discord/discord-api-docs](https://github.com/discord/discord-api-docs), configurable via `REPO_SOURCE`).
 
 ## Prerequisites
 
@@ -30,6 +30,7 @@ Sends Discord webhook notifications when pull requests are opened, closed, or me
    GITHUB_TOKEN=your_github_personal_access_token
    WEBHOOK_URLS=https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/...
    REPO_TARGET=owner/repo
+   REPO_SOURCE=discord/discord-api-docs
    NUMBER_OF_ISSUE=1
    ```
 
@@ -38,6 +39,7 @@ Sends Discord webhook notifications when pull requests are opened, closed, or me
    | `GITHUB_TOKEN`    | GitHub PAT with permission to edit issues on the target repo       |
    | `WEBHOOK_URLS`    | Discord webhook URLs to post notifications (comma-separated for multiple) |
    | `REPO_TARGET`     | GitHub repo that holds the tracker issue (e.g. `MARCROCK22/discord-api-docs-tracker`) |
+   | `REPO_SOURCE`     | GitHub repo to watch for pull requests (e.g. `discord/discord-api-docs`) |
    | `NUMBER_OF_ISSUE` | Issue number used to store the last check timestamp                |
 
 ## Usage

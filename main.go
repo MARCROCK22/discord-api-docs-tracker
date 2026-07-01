@@ -19,6 +19,7 @@ type appConfig struct {
 	GITHUB_TOKEN    string `envconfig:"GITHUB_TOKEN"`
 	REPO_TARGET     string `envconfig:"REPO_TARGET"`
 	NUMBER_OF_ISSUE string `envconfig:"NUMBER_OF_ISSUE"`
+	REPO_SOURCE     string `envconfig:"REPO_SOURCE"`
 }
 
 func main() {
@@ -56,7 +57,7 @@ func main() {
 	}
 	oldCheck := time.UnixMilli(int64(bodyInt))
 
-	pullRequestsResponse, err := Fetch("https://api.github.com/repos/discord/discord-api-docs/pulls?state=all")
+	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", appConfig.REPO_SOURCE))
 	if err != nil {
 		fmt.Printf("Error fetching pull requests: %v\n", err)
 		return
