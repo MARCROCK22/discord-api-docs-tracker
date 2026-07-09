@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,22 +15,32 @@ import (
 
 func main() {
 	webhookURLs := flag.String("webhooks", "", "comma-separated Discord webhook URLs")
-	githubToken := flag.String("token", "", "GitHub token with permission to edit the state issue")
 	repoTarget := flag.String("repo-target", "", "owner/repo holding the state issue")
 	repoSource := flag.String("repo-source", "", "owner/repo to watch for pull requests")
 	numberOfIssue := flag.String("issue", "", "issue number storing the last-check timestamp")
 	flag.Parse()
 
-	if *webhookURLs == "" || *githubToken == "" || *repoTarget == "" || *repoSource == "" || *numberOfIssue == "" {
+	if *webhookURLs == "" || *repoTarget == "" || *repoSource == "" || *numberOfIssue == "" {
 		fmt.Println("missing required flags")
 		flag.Usage()
+		return
+	}
+
+	tokenBytes, err := os.ReadFile(".github_token")
+	if err != nil {
+		fmt.Printf("Error reading .github_token: %v\n", err)
+		return
+	}
+	githubToken := strings.TrimSpace(string(tokenBytes))
+	if githubToken == "" {
+		fmt.Println(".github_token is empty")
 		return
 	}
 
 	webhooks := strings.Split(*webhookURLs, ",")
 	issueUrl := fmt.Sprintf("https://api.github.com/repos/%s/issues/%s", *repoTarget, *numberOfIssue)
 
-	response, err := Fetch(issueUrl, *githubToken)
+	response, err := Fetch(issueUrl, githubToken)
 	if err != nil {
 		fmt.Printf("Error fetching issue: %v\n", err)
 		return
@@ -50,7 +61,7 @@ func main() {
 	}
 	oldCheck := time.UnixMilli(int64(bodyInt))
 
-	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", *repoSource), *githubToken)
+	pullRequestsResponse, err := Fetch(fmt.Sprintf("https://api.github.com/repos/%s/pulls?state=all", *repoSource), githubToken)
 	if err != nil {
 		fmt.Printf("Error fetching pull requests: %v\n", err)
 		return
@@ -128,7 +139,7 @@ func main() {
 		"body": strconv.FormatInt(time.Now().UnixMilli(), 10),
 	}, map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", *githubToken),
+		"Authorization": fmt.Sprintf("Bearer %s", githubToken),
 	})
 	if err != nil {
 		fmt.Printf("Error updating issue: %v\n", err)

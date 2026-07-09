@@ -27,6 +27,12 @@ go.work.sum
 # env file
 .env
 
+# github token
+.github_token
+
+# built binary
+discord-api-docs-tracker
+
 # Editor/IDE
 # .idea/
 # .vscode/

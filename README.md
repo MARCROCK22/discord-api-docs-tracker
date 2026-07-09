@@ -24,13 +24,18 @@ Sends Discord webhook notifications when pull requests are opened, closed, or me
    go build -o discord-api-docs-tracker .
    ```
 
+3. Put your GitHub token (with permission to edit issues on the target repo) in a `.github_token` file in the working directory:
+
+   ```sh
+   printf %s "$GITHUB_TOKEN" > .github_token
+   ```
+
 ## Usage
 
-Configuration is passed as command-line flags:
+The GitHub token is read from a `.github_token` file in the working directory; everything else is passed as command-line flags:
 
 ```sh
 ./discord-api-docs-tracker \
-  -token "$GITHUB_TOKEN" \
   -webhooks "https://discord.com/api/webhooks/...,https://discord.com/api/webhooks/..." \
   -repo-target owner/repo \
   -repo-source discord/discord-api-docs \
@@ -39,7 +44,6 @@ Configuration is passed as command-line flags:
 
 | Flag           | Description                                                                            |
 | -------------- | ------------------------------------------------------------------------------------- |
-| `-token`       | GitHub PAT with permission to edit issues on the target repo                          |
 | `-webhooks`    | Discord webhook URLs to post notifications (comma-separated for multiple)             |
 | `-repo-target` | GitHub repo that holds the tracker issue (e.g. `MARCROCK22/discord-api-docs-tracker`) |
 | `-repo-source` | GitHub repo to watch for pull requests (e.g. `discord/discord-api-docs`)              |
@@ -51,5 +55,5 @@ Each execution performs a single check-and-notify cycle. To run it on a schedule
 
 ```sh
 # Example: run every 5 minutes via cron
-*/5 * * * * /path/to/discord-api-docs-tracker -token ... -webhooks ... -repo-target owner/repo -repo-source discord/discord-api-docs -issue 1
+*/5 * * * * /path/to/discord-api-docs-tracker -webhooks ... -repo-target owner/repo -repo-source discord/discord-api-docs -issue 1
 ```
